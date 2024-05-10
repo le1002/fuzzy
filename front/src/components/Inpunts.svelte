@@ -1,6 +1,11 @@
 <script lang="ts">
-	import { yAxioProbability } from '../services/coordinates'
-	import { params as paramsStore, yProbability } from '../stores'
+	import {
+		yAxioProbability,
+		beginAndEnd,
+		yAxioNecessity,
+		yAxioPossibility,
+	} from '../services/coordinates'
+	import { params as paramsStore, yProbability, timeBeginEnd, grafStore } from '../stores'
 	// import { keys } from 'ts-transformer-keys'
 	import type { params } from '../types/params'
 	let params = {
@@ -38,8 +43,12 @@
 		const values = Object.keys(project).map((key) => project[key].value)
 		let keys = ['a_s', 'b_s', 'c_s', 'd_s', 'a_f', 'b_f', 'c_f', 'd_f', 'lamda_l', 'lamda_r']
 		const paramsTmp = keys.reduce((a, v, i) => ({ ...a, [v]: values[i] }), {}) as params
-		yProbability.set(yAxioProbability(paramsTmp))
-		paramsStore.set({ ...paramsTmp, resources: project.resources.value })
+		let inputs = { ...paramsTmp, resources: project.resources.value }
+		grafStore.set({
+			inputs,
+			matrix: [yAxioProbability(paramsTmp), yAxioNecessity(paramsTmp), yAxioPossibility(paramsTmp)],
+		})
+		timeBeginEnd.set(beginAndEnd(paramsTmp))
 	}
 	// $:
 </script>

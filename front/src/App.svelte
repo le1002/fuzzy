@@ -5,7 +5,7 @@
 
 <main>
 	<Inpunts />
-	<Chart />
+	<Chart boundaries={[0, 3]} labels={['Probability', 'Necessity', 'Possibility']} />
 </main>
 
 <style>

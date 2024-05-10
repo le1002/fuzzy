@@ -1,33 +1,37 @@
 <script lang="ts">
-	import { params, yProbability } from '../stores'
+	import { params, yProbability, grafStore } from '../stores'
 	import { onMount } from 'svelte'
 	import Chart from 'chart.js/auto'
+	import { beginAndEnd } from '../services/coordinates'
 
 	let chartCanvas = null
 	let chart = null
 
+	export let boundaries
+	export let labels
 	onMount(() => {
 		const ctx = chartCanvas.getContext('2d')
 		chart = new Chart(ctx, {
 			type: 'scatter',
 			data: {
-				datasets: [
-					{
-						label: 'Test',
-						data: [],
-						showLine: true,
-					},
-				],
+				datasets: labels.map((label) => ({
+					label,
+					data: [],
+					showLine: true,
+				})),
 			},
 			options: {
 				responsive: true,
 			},
 		})
-		yProbability.subscribe((yValues: number[]) => {
-			if (yValues && chart) {
-				let xy = yValues.map((y, x) => ({ x, y }))
-				console.log(chart.data.datasets[0])
-				chart.data.datasets[0].data = xy
+		grafStore.subscribe((graf) => {
+			if (graf && chart) {
+				let newMatrix = graf.matrix.slice(...boundaries)
+				let matrixXY = newMatrix.map((yValues) => yValues.map((y, x) => ({ x, y })))
+				console.log(matrixXY)
+				matrixXY.forEach((value, index) => {
+					chart.data.datasets[index].data = value
+				})
 				chart.update()
 			}
 		})
