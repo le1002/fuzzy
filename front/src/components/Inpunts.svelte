@@ -4,6 +4,7 @@
 		beginAndEnd,
 		yAxioNecessity,
 		yAxioPossibility,
+		yResourcesMaxProf,
 	} from '../services/coordinates'
 	import { params as paramsStore, yProbability, timeBeginEnd, grafStore } from '../stores'
 	// import { keys } from 'ts-transformer-keys'
@@ -37,16 +38,22 @@
 
 	Object.keys(project).forEach((name, index) => {
 		let newValue = paramsValues[index] ? paramsValues[index] : ''
-		if (!project[name].value) project[name].value = newValue
+		if (project[name].value == undefined) project[name].value = newValue
 	})
 	$: {
 		const values = Object.keys(project).map((key) => project[key].value)
 		let keys = ['a_s', 'b_s', 'c_s', 'd_s', 'a_f', 'b_f', 'c_f', 'd_f', 'lamda_l', 'lamda_r']
 		const paramsTmp = keys.reduce((a, v, i) => ({ ...a, [v]: values[i] }), {}) as params
 		let inputs = { ...paramsTmp, resources: project.resources.value }
+		console.log(inputs)
 		grafStore.set({
 			inputs,
-			matrix: [yAxioProbability(paramsTmp), yAxioNecessity(paramsTmp), yAxioPossibility(paramsTmp)],
+			matrix: [
+				yAxioProbability(paramsTmp),
+				yAxioNecessity(paramsTmp),
+				yAxioPossibility(paramsTmp),
+				yResourcesMaxProf(inputs),
+			],
 		})
 		timeBeginEnd.set(beginAndEnd(paramsTmp))
 	}

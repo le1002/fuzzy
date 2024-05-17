@@ -6,6 +6,11 @@
 <main>
 	<Inpunts />
 	<Chart boundaries={[0, 3]} labels={['Probability', 'Necessity', 'Possibility']} />
+	<Chart
+		flag="resources"
+		boundaries={[3, 6]}
+		labels={['Maximum profile', 'Minimal profile', '3']}
+	/>
 </main>
 
 <style>

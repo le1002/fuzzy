@@ -1,4 +1,4 @@
-import type { params, paramsResources } from '../types/params'
+import type { params, paramsWithResources } from '../types/params'
 
 export function getYPvar1(params: params, i: number, keyIndex: number) {
 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
@@ -165,24 +165,39 @@ export function getYPosvar2(params: params, i: number, keyIndex: number) {
 			return 0
 	}
 }
-export function getXResources(paramsResources: paramsResources, keyIndex: number) {
-	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, r } = paramsResources
+export function getXResources(paramsResources: paramsWithResources) {
+	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, resources } = paramsResources
 	let w = a_f - a_s
 	let z = d_f - d_s
-	switch (keyIndex) {
-		case 0:
-			let Dn = (d_f - c_s + a_f - d_s) / 2
-			let Db = (d_f - a_s + c_f - b_s) / 2
-			let D =
-				lamda_l * ((d_s - b_s) / 2 + (c_s - a_s) / 2) +
-				lamda_r * ((c_f - a_f) / 2 + (d_f - b_f) / 2) +
-				((a_f - d_s) / 2 + (d_f - c_s) / 2)
-			if (Db < D && D <= z) {
-				b_s = b_s - (2 * (D - Db) * (b_s - a_s)) / (b_s - a_s + d_f - c_f)
-				c_f = c_f + (2 * (D - Db) * (d_f - c_f)) / (b_s - a_s + d_f - c_f)
-			}
-			return [a_s, b_s, c_f, d_f]
+	let Dn = (d_f - c_s + a_f - d_s) / 2
+	let Db = (d_f - a_s + c_f - b_s) / 2
+	let D =
+		lamda_l * ((d_s - b_s) / 2 + (c_s - a_s) / 2) +
+		lamda_r * ((c_f - a_f) / 2 + (d_f - b_f) / 2) +
+		((a_f - d_s) / 2 + (d_f - c_s) / 2)
+	if (d_s > a_f && c_s <= b_f) {
+		let alfa =
+			((b_f - a_f) * (lamda_l * d_s - c_s) + (d_s - c_s) * (lamda_r * a_f - b_f)) /
+			((b_f - a_f) * (lamda_l - 1) + (d_s - c_s) * (lamda_r - 1))
+		let bette =
+			((b_f - lamda_r * a_f) * (lamda_l - 1) + (lamda_l * d_s - c_s) * (lamda_r - 1)) /
+			((b_f - a_f) * (lamda_l - 1) + (d_s - c_s) * (lamda_r - 1))
+		Dn = (b_f - c_s) ** 2 / (2 * (d_s - a_f + b_f - c_s))
+		D =
+			lamda_l * ((c_s - alfa) / 2 - (a_s + b_s) / 2) +
+			lamda_r * ((d_f + c_f) / 2 - (alfa + b_f) / 2) +
+			bette * ((b_f - c_s) / 2)
 	}
+	if (c_s > b_f) {
+		Db = (d_f - a_s + c_f - b_s) / 2
+		D =
+			lamda_l * ((c_s + b_f) / 2 - (a_s + b_s) / 2) + lamda_r * ((d_f + c_f) / 2 - (c_s + b_f) / 2)
+	}
+	if (Db < D && D <= z) {
+		b_s = b_s - (2 * (D - Db) * (b_s - a_s)) / (b_s - a_s + d_f - c_f)
+		c_f = c_f + (2 * (D - Db) * (d_f - c_f)) / (b_s - a_s + d_f - c_f)
+	}
+	return [a_s, b_s, c_f, d_f]
 }
 // export function getYBeginEnd(params: params, i: number, keyIndex: number) {
 // 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params

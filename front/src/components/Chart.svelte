@@ -7,6 +7,7 @@
 	let chartCanvas = null
 	let chart = null
 
+	export let flag = null
 	export let boundaries
 	export let labels
 	onMount(() => {
@@ -27,8 +28,11 @@
 		grafStore.subscribe((graf) => {
 			if (graf && chart) {
 				let newMatrix = graf.matrix.slice(...boundaries)
-				let matrixXY = newMatrix.map((yValues) => yValues.map((y, x) => ({ x, y })))
-				console.log(matrixXY)
+				let matrixXY = newMatrix
+				if (flag != 'resources') {
+					matrixXY = newMatrix.map((yValues) => yValues.map((y, x) => ({ x, y })))
+				}
+				// console.log(matrixXY)
 				matrixXY.forEach((value, index) => {
 					chart.data.datasets[index].data = value
 				})

@@ -1,4 +1,4 @@
-import type { params, params3, paramsResources, yVars, xVars } from '../types/params'
+import type { params, params3, yVars, xVars, paramsWithResources } from '../types/params'
 import {
 	getYPvar1,
 	getYPvar2,
@@ -57,7 +57,7 @@ export function yAxioProbability(params: params) {
 		yAxio = yFromVar2(xAxio, params, getYPvar2)
 	}
 	if (c_s > b_f) {
-		console.log(c_s)
+		// console.log(c_s)
 		xAxio.forEach((i) => {
 			let { a_s, b_s, b_f, c_s, c_f, d_f, lamda_l, lamda_r } = params
 			let changedParams: any = { a_s, b_s, b_f, c_s, c_f, d_f, lamda_l, lamda_r }
@@ -123,30 +123,33 @@ export function yAxioPossibility(params: params) {
 	}
 	return yAxio
 }
-export function yResourcesMaxProf(paramsResources: paramsResources) {
-	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, r } = paramsResources
+export function yResourcesMaxProf(paramsResources: paramsWithResources) {
+	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, resources } = paramsResources
 	let changedParams: any = { a_s, b_s, c_f, d_f, lamda_l, lamda_r }
+
 	let xAxio = [a_s, b_s, c_f, d_f]
-	let yAxio = [0, r, r, 0]
-	if (a_f >= d_s) {
-		xAxio = xAxioResourses(xAxio, paramsResources, getXResources)
-	}
+	let yAxio = [0, resources, resources, 0]
+	xAxio = getXResources(paramsResources)
+
+	console.log(xAxio)
+	let xyAxio = yAxio.map((value, index) => ({ x: xAxio[index], y: value }))
+	return xyAxio
 }
-function xAxioResourses(xAxio: number[], params: params, getXPvar: xVars) {
-	xAxio.forEach((i) => {
-		let paramsForKeys = { ...params }
-		// delete paramsForKeys.d_f
-		delete paramsForKeys.lamda_l
-		delete paramsForKeys.lamda_r
-		let keyIndex = Object.keys(paramsForKeys).findIndex((key, keyIndex, keys) => {
-			// console.log([i, params[keys[keyIndex]], params[keys[keyIndex + 1]]])
-			return isBetween(i, params[keys[keyIndex]], params[keys[keyIndex + 1]])
-		})
-		xAxio = getXPvar(params, keyIndex)
-		// console.log(keyIndex)
-	})
-	return xAxio
-}
+// function xAxioResourses(xAxio: number[], params: params, getXPvar: xVars) {
+// 	xAxio.forEach((i) => {
+// 		let paramsForKeys = { ...params }
+// 		// delete paramsForKeys.d_f
+// 		delete paramsForKeys.lamda_l
+// 		delete paramsForKeys.lamda_r
+// 		let keyIndex = Object.keys(paramsForKeys).findIndex((key, keyIndex, keys) => {
+// 			// console.log([i, params[keys[keyIndex]], params[keys[keyIndex + 1]]])
+// 			return isBetween(i, params[keys[keyIndex]], params[keys[keyIndex + 1]])
+// 		})
+// 		xAxio = getXPvar(params, keyIndex)
+// 		// console.log(keyIndex)
+// 	})
+// 	return xAxio
+// }
 export function beginAndEnd(params: params) {
 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
 	const xAxio = [a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f]
