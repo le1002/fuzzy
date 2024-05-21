@@ -8,6 +8,10 @@ import {
 	getYPosvar1,
 	getYPosvar2,
 	getXResources,
+	getXResourcesMin,
+	getYBeginEnd,
+	getYMin,
+	getYMax,
 } from './variant'
 function yProbability(xAxio: number[], params: params, getYPvar: yVars) {
 	let yAxio = []
@@ -21,7 +25,7 @@ function yProbability(xAxio: number[], params: params, getYPvar: yVars) {
 			return isBetween(i, params[keys[keyIndex]], params[keys[keyIndex + 1]])
 		})
 		yAxio[i] = getYPvar(params, i, keyIndex)
-		// console.log(keyIndex)
+		// console.log(yAxio[i])
 	})
 	return yAxio
 }
@@ -69,16 +73,16 @@ export function yAxioProbability(params: params) {
 function isBetween(i, a, b) {
 	return i <= b && i >= a
 }
-// export function beginAndEnd(params: params) {
-// 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
-// 	const xAxio = []
-// 	for (let index = 0; index < d_f + 2; index++) {
-// 		xAxio.push(index)
-// 	}
-// 	let yAxio = [...xAxio]
-// 	yAxio = yProbability(xAxio, params, getYBeginEnd)
-// 	return yAxio
-// }
+export function beginAndEnd(params: params) {
+	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
+	const xAxio = []
+	for (let index = 0; index < d_f + 2; index++) {
+		xAxio.push(index)
+	}
+	let yAxio = [...xAxio]
+	yAxio = yProbability(xAxio, params, getYBeginEnd)
+	return yAxio
+}
 export function yAxioNecessity(params: params) {
 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
 	const xAxio = []
@@ -127,11 +131,58 @@ export function yResourcesMaxProf(paramsResources: paramsWithResources) {
 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, resources } = paramsResources
 	let changedParams: any = { a_s, b_s, c_f, d_f, lamda_l, lamda_r }
 
-	let xAxio = [a_s, b_s, c_f, d_f]
-	let yAxio = [0, resources, resources, 0]
-	xAxio = getXResources(paramsResources)
+	let xAxio = [a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f]
+	if (lamda_l != lamda_r) {
+		xAxio = getXResources(paramsResources)
+		// xAxio.sort((a, b) => a - b)
+	}
 
-	console.log(xAxio)
+	let yAxio = [0, resources, resources, resources, resources, resources, resources, 0]
+	// console.log(xAxio)
+	if (lamda_l == lamda_r) {
+		if (resources > 0) {
+			yAxio = getYMax(paramsResources)
+			xAxio.sort((a, b) => a - b)
+		}
+		if (d_s > a_f && c_s <= b_f) {
+			let alfa =
+				((b_f - a_f) * (lamda_l * d_s - c_s) + (d_s - c_s) * (lamda_r * a_f - b_f)) /
+				((b_f - a_f) * (lamda_l - 1) + (d_s - c_s) * (lamda_r - 1))
+			xAxio = [a_s, b_s, c_s, alfa, alfa, b_f, c_f, d_f]
+		}
+	}
+	console.log(yAxio)
+	let xyAxio = yAxio.map((value, index) => ({ x: xAxio[index], y: value }))
+	return xyAxio
+}
+export function yResourcesMinProf(paramsResources: paramsWithResources) {
+	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, resources } = paramsResources
+	let changedParams: any = { a_s, b_s, c_f, d_f, lamda_l, lamda_r }
+	let xAxio = [a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f]
+	let yAxio = [0, 0, 0, resources, resources, 0, 0, 0]
+	if (lamda_l != lamda_r) {
+		xAxio = getXResourcesMin(paramsResources)
+		if (c_s > b_f) {
+			yAxio = [0, 0, 0, 0, 0, 0, 0, 0]
+		}
+		if (d_s > a_f && c_s <= b_f) {
+			resources = (resources * (b_f - c_s)) / (b_f - c_s + (d_s - a_f))
+			yAxio = [0, 0, 0, resources, resources, 0, 0, 0]
+		}
+	}
+	if (lamda_l == lamda_r) {
+		if (resources > 0) {
+			yAxio = getYMin(paramsResources)
+		}
+		if (d_s > a_f && c_s <= b_f) {
+			let alfa =
+				((b_f - a_f) * (lamda_l * d_s - c_s) + (d_s - c_s) * (lamda_r * a_f - b_f)) /
+				((b_f - a_f) * (lamda_l - 1) + (d_s - c_s) * (lamda_r - 1))
+			xAxio = [a_s, b_s, c_s, alfa, alfa, b_f, c_f, d_f]
+		}
+		// console.log(xAxio)
+	}
+	xAxio.sort((a, b) => a - b)
 	let xyAxio = yAxio.map((value, index) => ({ x: xAxio[index], y: value }))
 	return xyAxio
 }
@@ -150,9 +201,9 @@ export function yResourcesMaxProf(paramsResources: paramsWithResources) {
 // 	})
 // 	return xAxio
 // }
-export function beginAndEnd(params: params) {
-	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
-	const xAxio = [a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f]
-	const yAxio = [0, 0, 1, 1, 0, 0, 1, 1, 0, 0]
-	return [xAxio, yAxio]
-}
+// export function beginAndEnd(params: params) {
+// 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
+// 	const xAxio = [a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f]
+// 	const yAxio = [0, 0, 1, 1, 0, 0, 1, 1, 0, 0]
+// 	return [xAxio, yAxio]
+// }

@@ -169,7 +169,6 @@ export function getXResources(paramsResources: paramsWithResources) {
 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, resources } = paramsResources
 	let w = a_f - a_s
 	let z = d_f - d_s
-	let Dn = (d_f - c_s + a_f - d_s) / 2
 	let Db = (d_f - a_s + c_f - b_s) / 2
 	let D =
 		lamda_l * ((d_s - b_s) / 2 + (c_s - a_s) / 2) +
@@ -182,7 +181,6 @@ export function getXResources(paramsResources: paramsWithResources) {
 		let bette =
 			((b_f - lamda_r * a_f) * (lamda_l - 1) + (lamda_l * d_s - c_s) * (lamda_r - 1)) /
 			((b_f - a_f) * (lamda_l - 1) + (d_s - c_s) * (lamda_r - 1))
-		Dn = (b_f - c_s) ** 2 / (2 * (d_s - a_f + b_f - c_s))
 		D =
 			lamda_l * ((c_s - alfa) / 2 - (a_s + b_s) / 2) +
 			lamda_r * ((d_f + c_f) / 2 - (alfa + b_f) / 2) +
@@ -197,26 +195,126 @@ export function getXResources(paramsResources: paramsWithResources) {
 		b_s = b_s - (2 * (D - Db) * (b_s - a_s)) / (b_s - a_s + d_f - c_f)
 		c_f = c_f + (2 * (D - Db) * (d_f - c_f)) / (b_s - a_s + d_f - c_f)
 	}
-	return [a_s, b_s, c_f, d_f]
+	return [a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f]
 }
-// export function getYBeginEnd(params: params, i: number, keyIndex: number) {
-// 	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
-// 	switch (keyIndex) {
-// 		case 0:
-// 			return (i - a_s) / (b_s - a_s)
-// 		case 1:
-// 			return 1
-// 		case 2:
-// 			return (i - c_s) / (d_s - c_s)
-// 		case 3:
-// 			return 0
-// 		case 4:
-// 			return (i - a_f) / (b_f - a_f)
-// 		case 5:
-// 			return 1
-// 		case 6:
-// 			return (i - c_f) / (d_f - c_f)
-// 		default:
-// 			return 0
-// 	}
-// }
+export function getXResourcesMin(paramsResources: paramsWithResources) {
+	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, resources } = paramsResources
+	let w = a_f - a_s
+	let z = d_f - d_s
+	let Dn = (d_f - c_s + a_f - d_s) / 2
+	let D =
+		lamda_l * ((d_s - b_s) / 2 + (c_s - a_s) / 2) +
+		lamda_r * ((c_f - a_f) / 2 + (d_f - b_f) / 2) +
+		((a_f - d_s) / 2 + (d_f - c_s) / 2)
+	if (a_f >= d_s) {
+		if (w <= D && D < Dn) {
+			c_s = c_s + (2 * (Dn - D) * (d_s - c_s)) / (d_s - c_s + b_f - a_f)
+			b_f = b_f - (2 * (Dn - D) * (d_f - c_f)) / (d_s - c_s + b_f - a_f)
+		}
+	}
+	if (d_s > a_f && c_s <= b_f) {
+		let alfa =
+			((b_f - a_f) * (lamda_l * d_s - c_s) + (d_s - c_s) * (lamda_r * a_f - b_f)) /
+			((b_f - a_f) * (lamda_l - 1) + (d_s - c_s) * (lamda_r - 1))
+		let bette =
+			((b_f - lamda_r * a_f) * (lamda_l - 1) + (lamda_l * d_s - c_s) * (lamda_r - 1)) /
+			((b_f - a_f) * (lamda_l - 1) + (d_s - c_s) * (lamda_r - 1))
+		D =
+			lamda_l * ((c_s - alfa) / 2 - (a_s + b_s) / 2) +
+			lamda_r * ((d_f + c_f) / 2 - (alfa + b_f) / 2) +
+			bette * ((b_f - c_s) / 2)
+		a_f = alfa
+		d_s = alfa
+		if (w <= D && D < Dn) {
+			let bette_ =
+				(Math.sqrt(resources * resources * D * D + 2 * (d_s - a_f) * resources * D) -
+					resources * D) /
+				(d_s - a_f)
+			let teta = (1 - bette) / (1 - bette_)
+			c_s = teta * c_s + (1 - teta) * d_s
+			b_f = teta * b_f + (1 - teta) * a_f
+		}
+	}
+	return [a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f]
+}
+export function getYMax(params: paramsWithResources) {
+	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, resources } = params
+	let w = a_f - a_s
+	let z = d_f - d_s
+	// w = a_f - d_s
+	// z = d_f - a_s
+	console.log('z=', z)
+	let Dn = (d_f - c_s + a_f - d_s) / 2
+	let Db = (d_f - a_s + c_f - b_s) / 2
+	console.log('Db=', Db)
+	let lamdaMax = 1
+	let lamdaMaxR = lamdaMax * resources
+	if (z < Db) {
+		lamdaMax = (z - Dn) / (Db - Dn)
+		lamdaMaxR = lamdaMax * resources
+		console.log('lamdaMax=', lamdaMax)
+		if (c_s > b_f) {
+			lamdaMax = z / Db
+			lamdaMaxR = lamdaMax * resources
+		}
+	}
+	if (d_s > a_f && c_s <= b_f) {
+		return [0, lamdaMaxR, lamdaMaxR, resources, resources, lamdaMaxR, lamdaMaxR, 0]
+	}
+
+	return [0, lamdaMaxR, lamdaMaxR, resources, resources, lamdaMaxR, lamdaMaxR, 0]
+}
+export function getYMin(params: paramsWithResources) {
+	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r, resources } = params
+	let w = a_f - a_s
+	let z = d_f - d_s
+	// w = a_f - d_s
+	// z = d_f - a_s
+	let Dn = (d_f - c_s + a_f - d_s) / 2
+	let Db = (d_f - a_s + c_f - b_s) / 2
+	let lamdaMin = 0
+	let lamdaMinR = lamdaMin * resources
+	let B = Math.abs((b_f - c_s) / (b_f - c_s + (d_s - a_f)))
+	if (Dn < w) {
+		console.log('z=', z)
+		console.log('w=', w)
+		lamdaMin = (w - Dn) / (Db - Dn)
+		console.log('lamdaMin=', lamdaMin)
+		lamdaMinR = lamdaMin * resources
+		if (c_s > b_f) {
+			lamdaMin = w / Db
+			lamdaMinR = lamdaMin * resources
+			console.log('lamdaMin=', lamdaMin)
+			return [0, lamdaMinR, lamdaMinR, lamdaMinR, lamdaMinR, lamdaMinR, lamdaMinR, 0]
+		}
+	}
+	if (d_s > a_f && c_s <= b_f) {
+		// let B = (b_f - c_s) / (b_f - c_s + (d_s - a_f))
+		return [0, lamdaMinR, lamdaMinR, resources * B, resources * B, lamdaMinR, lamdaMinR, 0]
+	}
+	if (a_f >= d_s) {
+		return [0, lamdaMinR, lamdaMinR, resources, resources, lamdaMinR, lamdaMinR, 0]
+	}
+}
+
+export function getYBeginEnd(params: params, i: number, keyIndex: number) {
+	let { a_s, b_s, c_s, d_s, a_f, b_f, c_f, d_f, lamda_l, lamda_r } = params
+	switch (keyIndex) {
+		case 0:
+			return (i - a_s) / (b_s - a_s)
+		case 1:
+			return 1
+		case 2:
+			return (i - c_s) / (d_s - c_s)
+		case 3:
+			return 0
+		case 4:
+			return (i - a_f) / (b_f - a_f)
+		case 5:
+			return 1
+		case 6:
+			return (i - c_f) / (d_f - c_f)
+		default:
+			return 0
+	}
+}
